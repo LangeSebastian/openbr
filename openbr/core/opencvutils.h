@@ -39,9 +39,9 @@ namespace OpenCVUtils
     // To image
     cv::Mat toMat(const QList<float> &src, int rows = -1);
     cv::Mat toMat(const QList< QList<float> > &srcs, int rows = -1);
-    cv::Mat toMat(const QList<int> &src, int rows = -1);
+    BR_EXPORT cv::Mat toMat(const QList<int> &src, int rows = -1);
 
-    cv::Mat toMat(const QList<cv::Mat> &src);      // Data organized one matrix per row
+    BR_EXPORT cv::Mat toMat(const QList<cv::Mat> &src);      // Data organized one matrix per row
     cv::Mat toMatByRow(const QList<cv::Mat> &src); // Data organized one row per row
 
     // From image
@@ -94,6 +94,7 @@ namespace OpenCVUtils
     QList<QPointF> fromPoints(const QList<cv::Point2f> &cvPoints);
     cv::Mat pointsToMatrix(const QList<QPointF> &qPoints);
     cv::Rect toRect(const QRectF &qRect);
+    cv::RotatedRect toRotatedRect(const QRectF &qRect, float angle);
     QRectF fromRect(const cv::Rect &cvRect);
     QList<cv::Rect> toRects(const QList<QRectF> &qRects);
     QList<QRectF> fromRects(const QList<cv::Rect> &cvRects);
@@ -105,15 +106,17 @@ namespace OpenCVUtils
     void group(QList<cv::Rect> &rects, QList<float> &confidences, float confidenceThreshold, int minNeighbors, float epsilon, bool useMax=false, QList<int> *maxIndices=NULL);
     void pad(const br::Template &src, br::Template &dst, bool padMat, const QList<int> &padding, bool padPoints, bool padRects, int border=0, int value=0);
     void pad(const br::TemplateList &src, br::TemplateList &dst, bool padMat, const QList<int> &padding, bool padPoints, bool padRects, int border=0, int value=0);
-    void rotate(const br::Template &src, br::Template &dst, float degrees, bool rotateMat=true, bool rotatePoints=true, bool rotateRects=true);
-    void rotate(const br::TemplateList &src, br::TemplateList &dst, float degrees, bool rotateMat=true, bool rotatePoint=true, bool rotateRects=true);
+    QPointF rotatePoint(const QPointF &point, const cv::Mat &rotationMatrix);
+    QList<QPointF> rotatePoints(const QList<QPointF> &points, const cv::Mat &rotationMatrix);
+    void rotate(const br::Template &src, br::Template &dst, float degrees, bool rotateMat=true, bool rotatePoints=true, bool rotateRects=true, const QPointF &center = QPointF());
+    void rotate(const br::TemplateList &src, br::TemplateList &dst, float degrees, bool rotateMat=true, bool rotatePoint=true, bool rotateRects=true, const QPointF &center = QPointF());
     void flip(const br::Template &src, br::Template &dst, int axis, bool flipMat=true, bool flipPoints=true, bool flipRects=true);
     void flip(const br::TemplateList &src, br::TemplateList &dst, int axis, bool flipMat=true, bool flipPoints=true, bool flipRects=true);
 
     int getFourcc();
 }
 
-QDebug operator<<(QDebug dbg, const cv::Mat &m);
+BR_EXPORT QDebug operator<<(QDebug dbg, const cv::Mat &m);
 QDebug operator<<(QDebug dbg, const cv::Point &p);
 QDebug operator<<(QDebug dbg, const cv::Rect &r);
 QDataStream &operator<<(QDataStream &stream, const cv::Mat &m);

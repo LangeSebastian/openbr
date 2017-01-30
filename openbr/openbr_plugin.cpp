@@ -111,7 +111,11 @@ QList<File> File::split(const QString &separator) const
     QList<File> files;
     foreach (const QString &word, name.split(separator, QString::SkipEmptyParts)) {
         File file(word);
-        file.append(m_metadata);
+        // If file metadata is empty after this constructor, it means that this is the
+        // file corresponding to *this.m_metadata, so we append its metadata to get
+        // the correct functionality
+        if (file.m_metadata.isEmpty())
+            file.append(m_metadata);
         files.append(file);
     }
     return files;
@@ -270,6 +274,17 @@ void File::appendRects(const QList<QRectF> &rects)
 void File::appendRects(const QList<cv::Rect> &rects)
 {
     appendRects(OpenCVUtils::fromRects(rects));
+}
+
+QList<RotatedRect> File::namedRotatedRects() const
+{
+    QList<RotatedRect> rects;
+    foreach (const QString &key, localMetadata().keys()) {
+        const QVariant &variant = m_metadata[key];
+        if (variant.canConvert<RotatedRect>())
+            rects.append(variant.value<RotatedRect>());
+    }
+    return rects;
 }
 
 /* File - private methods */
@@ -753,7 +768,7 @@ QStringList Object::prunedArguments(bool expanded) const
         const char *name = metaObject()->property(i).name();
 
         QVariant defaultVal = shellObject->property(name);
-        
+
         if (defaultVal != property(name))
             arguments.append(name + QString("=") + argument(i, expanded));
     }
@@ -1276,6 +1291,7 @@ void br::Context::initialize(int &argc, char *argv[], QString sdkPath, bool useG
     QCoreApplication::setApplicationVersion(PRODUCT_VERSION);
 
     qRegisterMetaType<cv::Mat>();
+    qRegisterMetaType<cv::RotatedRect>();
     qRegisterMetaType<br::File>();
     qRegisterMetaType<br::FileList>();
     qRegisterMetaType<br::Template>();
@@ -1303,6 +1319,9 @@ void br::Context::initialize(int &argc, char *argv[], QString sdkPath, bool useG
 
     // We seed with 0 instead of time(NULL) to have reproducible randomness
     srand(0);
+
+    // Disable OpenCV parallelism, we prefer to parallelize at the image level
+    setNumThreads(0);
 
     // Trigger registered initializers
     QList< QSharedPointer<Initializer> > initializers = Factory<Initializer>::makeAll();
@@ -1617,7 +1636,7 @@ Transform *Transform::make(QString str, QObject *parent)
 
     if (transform->independent) {
         File independent(".Independent");
-        independent.set("transform", qVariantFromValue<void*>(transform));
+        independent.set("transform", QVariant::fromValue(transform));
         transform = Factory<Transform>::make(independent);
     }
 

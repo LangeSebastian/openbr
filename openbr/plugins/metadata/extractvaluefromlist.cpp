@@ -1,3 +1,4 @@
+
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright 2015 Rank One Computing Corporation                             *
  *                                                                           *
@@ -21,39 +22,39 @@ namespace br
 
 /*!
  * \ingroup transforms
- * \brief Check if a the automated face detection contains the landmarks corresponding
- *          to the tempate metadata. If not, drop the template. This is meant for use
- *          during training, where the landmarks will be ground truth'd. If one wants to
- *          using a ground truth bounding box instead, then convert the BB to a landmark.
- * \br_property int index Index of the landmark to be used.
- * \br_property QString inputVariable Metadata key for the rect.
- * \author Brendan Klare \cite bklare
+ * \brief Extracts a single value from a list and sets the specified key to that value.
+ * \br_property QString key The meta-data key that contains a list of values
+ * \br_property int index The index of the value of interest (0 offset)
+ * \br_property QString outputKey The output metadata key which stores the value of interest
+ * \author Keyur Patel \cite kpatel
  */
-class VerifyDetectionTransform : public UntrainableMetaTransform
+class ExtractValueFromListTransform : public UntrainableMetadataTransform
 {
     Q_OBJECT
+    Q_PROPERTY(QString key READ get_key WRITE set_key RESET reset_key STORED false)
     Q_PROPERTY(int index READ get_index WRITE set_index RESET reset_index STORED false)
-    Q_PROPERTY(QString inputVariable READ get_inputVariable WRITE set_inputVariable RESET reset_inputVariable STORED false)
-    BR_PROPERTY(int, index, 14)
-    BR_PROPERTY(QString, inputVariable, "Face")
+    Q_PROPERTY(QString outputKey READ get_outputKey WRITE set_outputKey RESET reset_outputKey STORED false)
 
-    void project(const Template &src, Template &dst) const
+    BR_PROPERTY(QString, key, "")
+    BR_PROPERTY(int, index, 0)
+    BR_PROPERTY(QString, outputKey, "ExtractedValue")
+
+    void projectMetadata(const File &src, File &dst) const
     {
-        TemplateList temp;
-        project(TemplateList() << src, temp);
-        if (!temp.isEmpty()) dst = temp.first();
+        dst = src;
+
+        if (src.contains(key)){
+            QList<float> values = src.getList<float>(key);
+            if (values.size() -1 >= index && index >= 0)
+                dst.set(outputKey,values[index]);
+        } 
     }
 
-    void project(const TemplateList &src, TemplateList &dst) const
-    {
-        for (int i = 0; i < src.size(); i++)
-            if (src[i].file.get<QRectF>(inputVariable).contains(src[i].file.points()[index]))
-                dst.append(src[i]);
-    }
 };
 
-BR_REGISTER(Transform, VerifyDetectionTransform)
+BR_REGISTER(Transform, ExtractValueFromListTransform)
 
 } // namespace br
 
-#include "metadata/verifydetection.moc"
+#include "metadata/extractvaluefromlist.moc"
+

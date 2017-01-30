@@ -66,6 +66,8 @@ BR_EXPORT void br_eval_regression(const char *predicted_gallery, const char *tru
 
 BR_EXPORT void br_eval_knn(const char *knnGraph, const char *knnTruth, const char *csv = "");
 
+BR_EXPORT void br_eval_eer(const char *predicted_xml, const char *gt_property = "", const char *distribution_property = "");
+
 BR_EXPORT void br_finalize();
 
 BR_EXPORT void br_fuse(int num_input_simmats, const char *input_simmats[],
@@ -116,6 +118,8 @@ BR_EXPORT void br_train(const char *input, const char *model = "");
 BR_EXPORT void br_train_n(int num_inputs, const char *inputs[], const char *model = "");
 
 BR_EXPORT const char *br_version();
+
+BR_EXPORT void br_slave_process(const char * baseKey);
 
 BR_EXPORT void br_likely(const char *input_type, const char *output_type, const char *output_source_file);
 

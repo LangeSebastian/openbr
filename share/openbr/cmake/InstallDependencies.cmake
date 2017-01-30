@@ -102,6 +102,9 @@ function(install_qt_platforms)
     else()
       install(FILES ${_qt5Core_install_prefix}/plugins/platforms/libqlinuxfb.so
               DESTINATION bin/platforms)
+      install_qt_library(XcbQpa)
+      install(FILES ${_qt5Core_install_prefix}/plugins/platforms/libqxcb.so
+              DESTINATION bin/platforms)
     endif()
   endif()
 endfunction()
@@ -121,6 +124,8 @@ function(install_qt_misc)
     install(FILES ${_qt5Core_install_prefix}/plugins/platforms/qwindows${BR_INSTALL_DEPENDENCIES_SUFFIX}.dll DESTINATION bin/platforms)
   elseif(ANDROID)
     install(FILES ${__libstl} DESTINATION lib)
+    install(FILES ${_qt5Core_install_prefix}/jar/QtAndroid-bundled.jar
+            DESTINATION java)
   elseif(UNIX AND NOT APPLE)
     file(GLOB icudlls ${_qt5Core_install_prefix}/lib/libicu*.so*)
     install(FILES ${icudlls} DESTINATION lib)

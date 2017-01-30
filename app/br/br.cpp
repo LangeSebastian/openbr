@@ -171,6 +171,9 @@ public:
             } else if (!strcmp(fun, "evalKNN")) {
                 check(parc >= 2 && parc <= 3, "Incorrect parameter count for 'evalKNN'.");
                 br_eval_knn(parv[0], parv[1], parc > 2 ? parv[2] : "");
+            } else if (!strcmp(fun, "evalEER")) {
+                check(parc >=1 && parc <=3 , "Incorrect parameter count for 'evalEER'.");
+                br_eval_eer(parv[0], parc > 1 ? parv[1] : "", parc > 2 ? parv[2] : "");
             } else if (!strcmp(fun, "pairwiseCompare")) {
                 check((parc >= 2) && (parc <= 3), "Incorrect parameter count for 'pairwiseCompare'.");
                 br_pairwise_compare(parv[0], parv[1], parc == 3 ? parv[2] : "");
@@ -223,6 +226,11 @@ public:
                 check(parc == 1, "Incorrect parameter count for 'daemon'.");
                 daemon = true;
                 daemon_pipe = parv[0];
+            } else if (!strcmp(fun, "slave")) {
+                // This is used internally by processWrapper, if you want to remove it, also remove
+                // plugins/core/processwrapper.cpp
+                check(parc == 1, "Incorrect parameter count for 'slave'");
+                br_slave_process(parv[0]);
             } else if (!strcmp(fun, "exit")) {
                 check(parc == 0, "No parameters expected for 'exit'.");
                 daemon = false;
